@@ -3,6 +3,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
 function Dashboard() {
+
   const navigate = useNavigate();
 
   const [courses, setCourses] = useState([]);
@@ -10,7 +11,9 @@ function Dashboard() {
   const [enrolledCourses, setEnrolledCourses] = useState([]);
   const [accessMap] = useState({});
   const [loading, setLoading] = useState(true);
+
   useEffect(() => {
+
     const token = localStorage.getItem("token");
 
     if (!token) {
@@ -20,46 +23,69 @@ function Dashboard() {
 
     fetchCourses();
     fetchEnrolled();
+
   }, []);
 
+  // REMOVE DUPLICATE COURSES
   const uniqueCourses = Array.from(
-  new Map(
-    courses.map(c => [c.title, c]) // 👈 KEY FIX
-  ).values()  );
+    new Map(
+      courses.map(c => [c.title, c])
+    ).values()
+  );
 
+  // FETCH ENROLLED COURSES
   const fetchEnrolled = async () => {
+
     try {
+
       const userId = localStorage.getItem("userId");
 
       const res = await axios.get(
         `http://localhost:5000/api/mycourses/${userId}`
       );
 
-      setEnrolledCourses(res.data.map(c => c._id));
+      setEnrolledCourses(
+        res.data.map(c => c._id)
+      );
+
     } catch (err) {
+
       console.log(err);
+
     }
+
   };
 
- const fetchCourses = async () => {
-  try {
-    setLoading(true);
+  // FETCH COURSES
+  const fetchCourses = async () => {
 
-    const res = await axios.get(
-      "http://localhost:5000/api/courses"
-    );
-
-    setCourses(res.data);
-
-  } catch (err) {
-    console.log(err);
-  } finally {
-    setLoading(false);
-  }
-};
-
-  const enrollCourse = async (courseId) => {
     try {
+
+      setLoading(true);
+
+      const res = await axios.get(
+        "http://localhost:5000/api/courses"
+      );
+
+      setCourses(res.data);
+
+    } catch (err) {
+
+      console.log(err);
+
+    } finally {
+
+      setLoading(false);
+
+    }
+
+  };
+
+  // ENROLL COURSE
+  const enrollCourse = async (courseId) => {
+
+    try {
+
       const userId = localStorage.getItem("userId");
       const token = localStorage.getItem("token");
 
@@ -74,13 +100,20 @@ function Dashboard() {
       );
 
       fetchEnrolled();
+
     } catch (err) {
+
       console.log(err);
+
     }
+
   };
 
+  // PAYMENT
   const handlePayment = async (course) => {
+
     try {
+
       const res = await axios.post(
         "http://localhost:5000/api/payment/create-order",
         { amount: course.price }
@@ -89,36 +122,88 @@ function Dashboard() {
       const order = res.data;
 
       const options = {
+
         key: "rzp_test_SqtJiX2upn8qvY",
+
         amount: order.amount,
+
         currency: order.currency,
+
         name: "Online Course Platform",
+
         description: course.title,
+
         order_id: order.id,
 
         handler: async function () {
+
           alert("Payment Successful 🎉");
+
           await enrollCourse(course._id);
+
         }
+
       };
 
       const rzp = new window.Razorpay(options);
+
       rzp.open();
 
     } catch (err) {
+
       console.log(err);
+
     }
+
   };
 
+  // SEARCH FILTER
+  const filteredCourses = uniqueCourses.filter(course =>
+    course.title
+      .toLowerCase()
+      .includes(search.toLowerCase())
+  );
+
   return (
-    <div className="form-container" style={{ width: "80%", margin: "auto", padding: "20px" }}>
+
+    <div
+      className="form-container"
+      style={{
+        width: "80%",
+        margin: "auto",
+        padding: "20px"
+      }}
+    >
+
       <h2>Dashboard</h2>
 
-      <div style={{ display: "flex", gap: "10px", marginBottom: "20px" }}>
-        <button onClick={() => navigate("/login")}>Logout</button>
-        <button onClick={() => navigate("/mycourses")}>My Courses</button>
+      {/* TOP BUTTONS */}
+      <div
+        style={{
+          display: "flex",
+          gap: "10px",
+          marginBottom: "20px"
+        }}
+      >
+
+        <button onClick={() => {
+
+          localStorage.removeItem("token");
+          localStorage.removeItem("userId");
+
+          navigate("/login");
+
+        }}>
+          Logout
+        </button>
+
+        <button onClick={() => navigate("/mycourses")}>
+          My Courses
+        </button>
+
       </div>
 
+      {/* SEARCH */}
       <input
         type="text"
         placeholder="Search courses..."
@@ -135,49 +220,94 @@ function Dashboard() {
 
       <h3>Available Courses</h3>
 
-      {/* ✅ FIXED JSX BLOCK */}
-      {uniqueCourses
-        .filter(course =>
-          course.title.toLowerCase().includes(search.toLowerCase())
-        )
-        .map(course => {
-          const isEnrolled = enrolledCourses.includes(course._id);
+      {/* LOADING */}
+      {loading && (
+        <p>Loading courses...</p>
+      )}
 
-          return (
+      {/* NO COURSES */}
+      {!loading && uniqueCourses.length === 0 && (
+        <p>No courses available</p>
+      )}
+
+      {/* NO SEARCH RESULTS */}
+      {!loading && filteredCourses.length === 0 && (
+        <p>No matching courses found</p>
+      )}
+
+      {/* COURSES */}
+      {!loading && filteredCourses.map(course => {
+
+        const isEnrolled =
+          enrolledCourses.includes(course._id);
+
+        return (
+
+          <div
+            key={course._id}
+            style={{
+              border: "1px solid #ccc",
+              padding: "20px",
+              margin: "15px 0",
+              borderRadius: "12px",
+              background: "#f9f9f9"
+            }}
+          >
+
+            <h4>{course.title}</h4>
+
+            <p>{course.description}</p>
+
+            <p>
+              <strong>₹ {course.price}</strong>
+            </p>
+
             <div
-              key={course._id}
               style={{
-                border: "1px solid #ccc",
-                padding: "20px",
-                margin: "15px 0",
-                borderRadius: "12px",
-                background: "#f9f9f9"
+                display: "flex",
+                gap: "10px"
               }}
             >
-              <h4>{course.title}</h4>
-              <p>{course.description}</p>
-              <p><strong>₹ {course.price}</strong></p>
 
-              <div style={{ display: "flex", gap: "10px" }}>
-                <button onClick={() => handlePayment(course)}>
-                  Enroll & Pay
+              <button
+                onClick={() => handlePayment(course)}
+              >
+                Enroll & Pay
+              </button>
+
+              {isEnrolled ? (
+
+                <button
+                  onClick={() =>
+                    navigate(`/course/${course._id}`)
+                  }
+                >
+                  Start Learning
                 </button>
 
-                {isEnrolled ? (
-                  <button onClick={() => navigate(`/course/${course._id}`)}>
-                    Start Learning
-                  </button>
-                ) : (
-                  <button disabled style={{ opacity: 0.5 }}>
-                    🔒 Enroll to Unlock
-                  </button>
-                )}
-              </div>
+              ) : (
+
+                <button
+                  disabled
+                  style={{ opacity: 0.5 }}
+                >
+                  🔒 Enroll to Unlock
+                </button>
+
+              )}
+
             </div>
-          );
-        })}
+
+          </div>
+
+        );
+
+      })}
+
     </div>
+
   );
+
 }
 
 export default Dashboard;
