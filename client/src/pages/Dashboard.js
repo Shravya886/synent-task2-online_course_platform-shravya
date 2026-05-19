@@ -9,7 +9,7 @@ function Dashboard() {
   const [search, setSearch] = useState("");
   const [enrolledCourses, setEnrolledCourses] = useState([]);
   const [accessMap] = useState({});
-
+  const [loading, setLoading] = useState(true);
   useEffect(() => {
     const token = localStorage.getItem("token");
 
@@ -41,14 +41,22 @@ function Dashboard() {
     }
   };
 
-  const fetchCourses = async () => {
-    try {
-      const res = await axios.get("http://localhost:5000/api/courses");
-      setCourses(res.data);
-    } catch (err) {
-      console.log(err);
-    }
-  };
+ const fetchCourses = async () => {
+  try {
+    setLoading(true);
+
+    const res = await axios.get(
+      "http://localhost:5000/api/courses"
+    );
+
+    setCourses(res.data);
+
+  } catch (err) {
+    console.log(err);
+  } finally {
+    setLoading(false);
+  }
+};
 
   const enrollCourse = async (courseId) => {
     try {
