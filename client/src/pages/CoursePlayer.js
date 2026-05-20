@@ -1,21 +1,26 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
-import ReactPlayer from "react-player";
 
 function CoursePlayer() {
   const { id } = useParams();
 
   const [course, setCourse] = useState(null);
   const [selectedVideo, setSelectedVideo] = useState("");
-const [loadingVideo, setLoadingVideo] = useState(false);
+  const [completedLessons, setCompletedLessons] = useState([]);
+  const [loadingVideo, setLoadingVideo] = useState(false);
 
-
+  // ======================
+  // LOAD COURSE + ACCESS
+  // ======================
   useEffect(() => {
     fetchCourse();
+    checkAccess();
   }, []);
 
-  // GET COURSE
+  // ======================
+  // FETCH COURSE
+  // ======================
   const fetchCourse = async () => {
     try {
       const res = await axios.get(
@@ -23,132 +28,160 @@ const [loadingVideo, setLoadingVideo] = useState(false);
       );
 
       const data = res.data;
+
       setCourse(data);
 
-      // first video auto-play
+      // Auto play first video
       const firstVideo =
         data?.modules?.[0]?.lessons?.[0]?.videoUrl;
 
       if (firstVideo) {
         setSelectedVideo(convertUrl(firstVideo));
       }
+
     } catch (err) {
       console.log(err);
     }
   };
 
-  // FIX YOUTUBE URL (IMPORTANT)
+  // ======================
+  // CHECK ENROLLMENT ACCESS
+  // ======================
+  const checkAccess = async () => {
+    try {
+      const userId = localStorage.getItem("userId");
+
+      if (!userId || !id) return;
+
+      const res = await axios.get(
+        `http://localhost:5000/api/enroll/check/${userId}/${id}`
+      );
+
+      if (!res.data.enrolled) {
+        alert("You are not enrolled in this course");
+        window.location.href = "/";
+      }
+
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  // ======================
+  // FIX YOUTUBE URL
+  // ======================
   const convertUrl = (url) => {
     if (!url) return "";
 
-    // embed → watch
     if (url.includes("embed")) {
-      const id = url.split("/embed/")[1];
-      return `https://www.youtube.com/watch?v=${id}`;
+      const vid = url.split("/embed/")[1];
+      return `https://www.youtube.com/watch?v=${vid}`;
     }
 
     return url;
   };
 
+  // ======================
   // PLAY VIDEO
-const handleVideoClick = (lesson) => {
-  console.log("VIDEO CLICKED:", lesson);
+  // ======================
+  const handleVideoClick = (lesson) => {
+    if (!lesson?.videoUrl) return;
 
-  const getVideoUrl = (url) => {
-    if (!url) return "";
+    const match = lesson.videoUrl.match(
+      /(?:embed\/|v=|youtu\.be\/)([^&?/]+)/
+    );
 
-    // extract video ID from embed link
-    const match = url.match(/(?:embed\/|v=|youtu\.be\/)([^&?/]+)/);
     const videoId = match ? match[1] : null;
 
-    return videoId
+    const finalUrl = videoId
       ? `https://www.youtube.com/watch?v=${videoId}`
-      : url;
+      : lesson.videoUrl;
+
+    setLoadingVideo(true);
+
+    setTimeout(() => {
+      setSelectedVideo(finalUrl);
+      setLoadingVideo(false);
+    }, 500);
   };
 
-  setSelectedVideo(getVideoUrl(lesson.videoUrl));
-};
-useEffect(() => {
-  const checkAccess = async () => {
-    const userId = localStorage.getItem("userId");
-
-    const res = await axios.get(
-      `http://localhost:5000/api/enroll/check/${userId}/${id}`
-    );
-
-    if (!res.data.enrolled) {
-      alert("You are not enrolled in this course");
-      window.location.href = "/";
-    }
-  };
-
-  checkAccess();
-}, []);
-
-  // MARK COMPLETED
+  // ======================
+  // MARK LESSON COMPLETED
+  // ======================
   const markCompleted = async (lesson) => {
-  try {
-    const token = localStorage.getItem("token");
-    const userId = localStorage.getItem("userId");
+    try {
+      const token = localStorage.getItem("token");
+      const userId = localStorage.getItem("userId");
 
-    if (!userId || !course?._id || !lesson?.title) {
-      console.log("Missing data:", { userId, course, lesson });
-      return;
-    }
-
-    await axios.post(
-      "http://localhost:5000/api/progress/complete",
-      {
-        userId: String(userId),
-        courseId: String(course._id),
-        lessonTitle: lesson.title,
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+      if (!userId || !course?._id || !lesson?.title) {
+        console.log("Missing data");
+        return;
       }
-    );
 
-    alert("Lesson Completed ✔");
-  } catch (err) {
-    console.log("PROGRESS ERROR:", err.response?.data || err.message);
+      await axios.post(
+        "http://localhost:5000/api/progress/complete",
+        {
+          userId: String(userId),
+          courseId: String(course._id),
+          lessonTitle: lesson.title,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      setCompletedLessons((prev) => [
+        ...prev,
+        lesson.title,
+      ]);
+
+      alert("Lesson Completed ✔");
+
+    } catch (err) {
+      console.log(
+        "PROGRESS ERROR:",
+        err.response?.data || err.message
+      );
+    }
+  };
+
+  // ======================
+  // LOADING
+  // ======================
+  if (!course) {
+    return <h2>Loading...</h2>;
   }
-};
-  if (!course) return <h2>Loading...</h2>;
-  const checkEnrollment = async () => {
-  try {
-    const userId = localStorage.getItem("userId");
 
-    if (!userId || !id) return;
-
-    const res = await axios.get(
-      `http://localhost:5000/api/enroll/check/${userId}/${id}`
-    );
-
-    console.log("ENROLL STATUS:", res.data);
-
-  } catch (err) {
-    console.log("Enroll check failed:", err.response?.data || err.message);
-  }
-};
-
+  // ======================
+  // UI
+  // ======================
   return (
     <div style={{ padding: "20px" }}>
+
       <h1>{course.title}</h1>
 
       {/* VIDEO PLAYER */}
-     {selectedVideo ? (
-  <div style={{ border: "2px solid red" }}>
-    <iframe
-      width="100%"
-      height="500px"
-      src={selectedVideo.replace("watch?v=", "embed/")}
-      title="Course Video"
-      frameBorder="0"
-      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-      allowFullScreen
-    ></iframe>
+      {selectedVideo ? (
+        <div style={{ marginBottom: "30px" }}>
+
+          {loadingVideo ? (
+            <h3>Loading Video...</h3>
+          ) : (
+            <iframe
+              width="100%"
+              height="500px"
+              src={selectedVideo.replace(
+                "watch?v=",
+                "embed/"
+              )}
+              title="Course Video"
+              frameBorder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+            ></iframe>
+          )}
 
         </div>
       ) : (
@@ -159,43 +192,89 @@ useEffect(() => {
 
       {/* MODULES */}
       {course.modules?.map((module, index) => (
+
         <div
           key={index}
           style={{
             border: "1px solid #ccc",
-            padding: "10px",
+            padding: "15px",
             marginTop: "20px",
+            borderRadius: "10px",
           }}
         >
+
           <h3>{module.title}</h3>
 
           {/* LESSONS */}
-          {module.lessons?.map((lesson, idx) => (
-            <div
-              key={idx}
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                margin: "10px 0",
-                padding: "5px",
-              }}
-            >
-              {/* PLAY VIDEO */}
-              <span
-                style={{ cursor: "pointer", color: "blue" }}
-                onClick={() => handleVideoClick(lesson)}
+          {module.lessons?.map((lesson, idx) => {
+
+            const isCompleted =
+              completedLessons.includes(lesson.title);
+
+            return (
+
+              <div
+                key={idx}
+                style={{
+                  border: "1px solid #eee",
+                  padding: "15px",
+                  marginBottom: "10px",
+                  borderRadius: "8px",
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                }}
               >
-                ▶ {lesson.title}
-              </span>
 
+                {/* LESSON TITLE */}
+                <div>
 
+                  <span
+                    style={{
+                      cursor: "pointer",
+                      color: "blue",
+                      fontWeight: "bold",
+                    }}
+                    onClick={() =>
+                      handleVideoClick(lesson)
+                    }
+                  >
+                    ▶ {lesson.title}
+                  </span>
 
-              {/* COMPLETE */}
-              <button onClick={() => markCompleted(lesson)}>
-                Mark Completed
-              </button>
-            </div>
-          ))}
+                  <br />
+
+                  {isCompleted ? (
+
+                    <span style={{ color: "green" }}>
+                      ✅ Completed
+                    </span>
+
+                  ) : (
+
+                    <span style={{ color: "orange" }}>
+                      🎥 Watch Lesson
+                    </span>
+
+                  )}
+
+                </div>
+
+                {/* COMPLETE BUTTON */}
+                <button
+                  disabled={isCompleted}
+                  onClick={() =>
+                    markCompleted(lesson)
+                  }
+                >
+                  {isCompleted
+                    ? "Completed"
+                    : "Mark Complete"}
+                </button>
+
+              </div>
+            );
+          })}
         </div>
       ))}
     </div>
