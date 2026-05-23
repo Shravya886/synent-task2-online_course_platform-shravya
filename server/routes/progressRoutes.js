@@ -33,20 +33,36 @@ router.post("/complete", async (req, res) => {
   }
 
 });
+
 router.get("/:userId/:courseId", async (req, res) => {
 
   try {
 
+    const { userId, courseId } = req.params;
+
     const progress = await Progress.findOne({
-      userId: req.params.userId,
-      courseId: req.params.courseId
+      userId,
+      courseId
     });
+
+    if (!progress) {
+
+      return res.json({
+        completedLessons: []
+      });
+
+    }
 
     res.json(progress);
 
   } catch (err) {
+
     console.log(err);
-    res.status(500).json({ msg: "Error fetching progress" });
+
+    res.status(500).json({
+      msg: "Error fetching progress"
+    });
+
   }
 
 });

@@ -19,27 +19,27 @@ function Register() {
 
   };
 
-  const handleSubmit = async (e) => {
+ const handleSubmit = async (e) => {
+  e.preventDefault();
 
-    e.preventDefault();
+  if (!formData.name || !formData.email || !formData.password) {
+    alert("All fields are required");
+    return;
+  }
 
-    try {
+  try {
+    const res = await axios.post(
+      "http://10.148.101.197:5000/api/auth/register",
+      formData
+    );
 
-      const res = await axios.post(
-        "http://localhost:5000/api/auth/register",
-        formData
-      );
+    alert(res.data.msg);
 
-      alert(res.data.msg);
-
-    } catch (err) {
-
-      console.log(err);
-
-      alert("Registration Failed");
-
-    }
-  };
+  } catch (err) {
+    console.log(err);
+    alert(err.response?.data?.msg || "Registration Failed");
+  }
+};
 
   return (
 

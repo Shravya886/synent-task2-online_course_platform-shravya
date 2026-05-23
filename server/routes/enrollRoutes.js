@@ -1,9 +1,16 @@
 const express = require("express");
 const router = express.Router();
 const Enrollment = require("../models/Enrollment");
-router.get("/check/:userId/:courseId", async (req, res) => {
+const { verifyToken } = require("../middleware/authMiddleware");
+
+
+// =======================
+// CHECK ENROLLMENT
+// =======================
+router.get("/check/:courseId", verifyToken, async (req, res) => {
   try {
-    const { userId, courseId } = req.params;
+    const userId = req.user.id;
+    const { courseId } = req.params;
 
     const enrollment = await Enrollment.findOne({
       userId,
@@ -19,15 +26,22 @@ router.get("/check/:userId/:courseId", async (req, res) => {
     res.status(500).json({ msg: "Server error" });
   }
 });
-router.post("/enroll", async (req, res) => {
 
+
+// =======================
+// ENROLL COURSE (SECURE)
+// =======================
+router.post("/enroll", verifyToken, async (req, res) => {
   try {
-
     console.log("ENROLL ROUTE HIT");
 
-    const { userId, courseId } = req.body;
+    const userId = req.user.id;   // 🔥 FROM TOKEN (NOT FRONTEND)
+    const { courseId } = req.body;
 
-    const existing = await Enrollment.findOne({ userId, courseId });
+    const existing = await Enrollment.findOne({
+      userId,
+      courseId
+    });
 
     if (existing) {
       return res.json({ msg: "Already Enrolled" });
@@ -38,7 +52,7 @@ router.post("/enroll", async (req, res) => {
       courseId
     });
 
-    await enrollment.save();   // 🔥 THIS WAS MISSING
+    await enrollment.save();
 
     res.json({ msg: "Enrolled Successfully" });
 
@@ -46,7 +60,6 @@ router.post("/enroll", async (req, res) => {
     console.log(err);
     res.status(500).json({ msg: "Enrollment Error" });
   }
-
 });
 
 module.exports = router;

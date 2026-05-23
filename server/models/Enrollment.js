@@ -2,12 +2,18 @@ const mongoose = require("mongoose");
 
 const enrollSchema = new mongoose.Schema({
   userId: {
-    type: String,
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
     required: true,
   },
   courseId: {
-    type: String,
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Course",
     required: true,
+  },
+
+   paymentId: {
+    type: String
   },
   status: {
     type: String,
@@ -19,4 +25,4 @@ const enrollSchema = new mongoose.Schema({
   },
 });
 
-module.exports = mongoose.model("Enroll", enrollSchema);
+module.exports = mongoose.model("Enrollment", enrollSchema);

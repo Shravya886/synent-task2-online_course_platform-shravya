@@ -1,7 +1,6 @@
 const jwt = require("jsonwebtoken");
 
 module.exports = function (req, res, next) {
-
   const authHeader = req.header("Authorization");
 
   if (!authHeader) {
@@ -9,18 +8,19 @@ module.exports = function (req, res, next) {
   }
 
   try {
+    const token = authHeader.split(" ")[1]; // Bearer token
 
-    const token = authHeader.split(" ")[1]; 
-    // format: Bearer token
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    const verified = jwt.verify(token, process.env.JWT_SECRET);
+    req.user = decoded;
 
-    req.user = verified;
+    // ✅ ADMIN CHECK (IMPORTANT)
+    if (decoded.role !== "admin") {
+      return res.status(403).json({ msg: "Admin access only" });
+    }
 
     next();
-
   } catch (err) {
-    res.status(401).json({ msg: "Invalid token" });
+    return res.status(401).json({ msg: "Invalid token" });
   }
-
 };

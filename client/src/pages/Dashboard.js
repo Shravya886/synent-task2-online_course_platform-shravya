@@ -41,7 +41,7 @@ function Dashboard() {
       const userId = localStorage.getItem("userId");
 
       const res = await axios.get(
-        `http://localhost:5000/api/mycourses/${userId}`
+        `http://10.148.101.197:5000/api/mycourses/${userId}`
       );
 
       setEnrolledCourses(
@@ -64,7 +64,7 @@ function Dashboard() {
       setLoading(true);
 
       const res = await axios.get(
-        "http://localhost:5000/api/courses"
+        "http://10.148.101.197:5000/api/courses"
       );
 
       setCourses(res.data);
@@ -90,7 +90,7 @@ function Dashboard() {
       const token = localStorage.getItem("token");
 
       await axios.post(
-        "http://localhost:5000/api/enroll/enroll",
+        "http://10.148.101.197:5000/api/enroll/enroll",
         { userId, courseId },
         {
           headers: {
@@ -115,7 +115,7 @@ function Dashboard() {
     try {
 
       const res = await axios.post(
-        "http://localhost:5000/api/payment/create-order",
+        "http://10.148.101.197:5000/api/payment/create-order",
         { amount: course.price }
       );
 
@@ -134,15 +134,27 @@ function Dashboard() {
         description: course.title,
 
         order_id: order.id,
+handler: async function (response) {
+  try {
+    await axios.post(
+      "http://10.148.101.197:5000/api/payment/verify",
+      {
+        razorpay_payment_id: response.razorpay_payment_id,
+        razorpay_order_id: response.razorpay_order_id,
+        razorpay_signature: response.razorpay_signature,
+        courseId: course._id,
+        userId: localStorage.getItem("userId")
+      }
+    );
 
-        handler: async function () {
+    alert("Payment Verified & Enrolled 🎉");
 
-          alert("Payment Successful 🎉");
+    fetchEnrolled(); // just refresh UI
 
-          await enrollCourse(course._id);
-
-        }
-
+  } catch (err) {
+    console.log(err);
+  }
+}
       };
 
       const rzp = new window.Razorpay(options);

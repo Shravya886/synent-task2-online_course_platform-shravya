@@ -1,0 +1,109 @@
+# Query: localhost:5000
+# ContextLines: 1
+
+24 results - 9 files
+
+client\src\pages\AdminDashboard.js:
+  20        const res = await axios.get(
+  21:         "http://10.148.101.197:5000/api/courses"
+  22        );
+
+  34        await axios.delete(
+  35:         `http://10.148.101.197:5000/api/courses/${id}`
+  36        );
+
+  45    try {
+  46:     await axios.post("http://10.148.101.197:5000/api/courses/add", {
+  47        title,
+
+  65      await axios.put(
+  66:       `http://10.148.101.197:5000/api/courses/${selectedCourseId}`,
+  67        {
+
+  98      await axios.put(
+  99:       `http://10.148.101.197:5000/api/courses/${selectedCourseId}`,
+  100        { modules }
+
+client\src\pages\AdminPanel.js:
+  26        const res = await axios.get(
+  27:         "http://10.148.101.197:5000/api/courses"
+  28        );
+
+  46        await axios.put(
+  47:         `http://10.148.101.197:5000/api/courses/${editId}`,
+  48          { title, description, price }
+
+  55       await axios.post(
+  56:   "http://10.148.101.197:5000/api/courses/add",
+  57    {
+
+  87        await axios.delete(
+  88:         `http://10.148.101.197:5000/api/courses/${id}`
+  89        );
+
+client\src\pages\CoursePlayer.js:
+   38        const res = await axios.get(
+   39:         `http://10.148.101.197:5000/api/courses/${id}`
+   40        );
+
+   75        const res = await axios.get(
+   76:         `http://10.148.101.197:5000/api/progress/${userId}/${id}`
+   77        );
+
+  103        const res = await axios.get(
+  104:         `http://10.148.101.197:5000/api/enroll/check/${userId}/${id}`
+  105        );
+
+  196        await axios.post(
+  197:         "http://10.148.101.197:5000/api/progress/complete",
+  198          {
+
+client\src\pages\Dashboard.js:
+   43        const res = await axios.get(
+   44:         `http://10.148.101.197:5000/api/mycourses/${userId}`
+   45        );
+
+   66        const res = await axios.get(
+   67:         "http://10.148.101.197:5000/api/courses"
+   68        );
+
+   92        await axios.post(
+   93:         "http://10.148.101.197:5000/api/enroll/enroll",
+   94          { userId, courseId },
+
+  117        const res = await axios.post(
+  118:         "http://10.148.101.197:5000/api/payment/create-order",
+  119          { amount: course.price }
+
+  141      await axios.post(
+  142:       "http://10.148.101.197:5000/api/payment/verify",
+  143        {
+
+client\src\pages\ForgotPassword.js:
+  8      try {
+  9:       const res = axios.post("http://10.148.101.197:5000/api/auth/forgot-password", {
+  10    email
+
+client\src\pages\Login.js:
+  25        const res = await axios.post(
+  26:         "http://10.148.101.197:5000/api/auth/login",
+  27          formData
+
+client\src\pages\MyCourses.js:
+  28        const res = await axios.get(
+  29:         `http://10.148.101.197:5000/api/mycourses/${userId}`
+  30        );
+
+  43            const progressRes = await axios.get(
+  44:             `http://10.148.101.197:5000/api/progress/${userId}/${course._id}`
+  45            );
+
+client\src\pages\Register.js:
+  28        const res = await axios.post(
+  29:         "http://10.148.101.197:5000/api/auth/register",
+  30          formData
+
+client\src\pages\ResetPassword.js:
+  22        const res =  await axios.post(
+  23:   `http://10.148.101.197:5000/api/auth/reset-password/${token}`,
+  24    { password }

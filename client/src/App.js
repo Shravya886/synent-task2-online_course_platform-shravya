@@ -7,7 +7,13 @@ import Dashboard from "./pages/Dashboard";
 import ProtectedRoute from "./ProtectedRoute";
 import MyCourses from "./pages/MyCourses";
 import CoursePlayer from "./pages/CoursePlayer";
-import AdminPanel from "./pages/AdminPanel";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
+import AdminLayout from "./pages/AdminLayout";
+import AdminDashboard from "./pages/AdminDashboard";
+import AdminCourses from "./pages/AdminCourses";
+import VerifyEmail from "./pages/VerifyEmail";
+import AdminEnrollments from "./pages/AdminEnrollments";
 
 function App() {
   return (
@@ -18,36 +24,51 @@ function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
 
-        {/* PROTECTED ROUTES */}
         <Route
           path="/dashboard"
-          element={
-            <ProtectedRoute>
-              <Dashboard />
-            </ProtectedRoute>
-          }
+          element={<ProtectedRoute><Dashboard /></ProtectedRoute>}
         />
 
         <Route
           path="/mycourses"
-          element={
-            <ProtectedRoute>
-              <MyCourses />
-            </ProtectedRoute>
-          }
+          element={<ProtectedRoute><MyCourses /></ProtectedRoute>}
         />
 
         <Route
           path="/course/:id"
-          element={
-            <ProtectedRoute>
-              <CoursePlayer />
-            </ProtectedRoute>
-          }
+          element={<ProtectedRoute><CoursePlayer /></ProtectedRoute>}
         />
-        <Route path="/admin" element={<AdminPanel />} />
+
+  <Route path="/admin" element={<AdminLayout />}>
+  <Route path="dashboard" element={<AdminDashboard />} />
+  <Route path="courses" element={<AdminCourses />} />
+  <Route path="enrollments" element={<AdminEnrollments />} />
+</Route>
+
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password/:token" element={<ResetPassword />} />
+<Route path="/verify-email/:token" element={<VerifyEmail />} />
+
+ <Route
+  path="/admin/courses"
+  element={
+    <ProtectedRoute roleRequired="admin">
+      <AdminCourses />
+    </ProtectedRoute>
+  }
+/>
+  <Route
+  path="/admin/courses"
+  element={
+    <ProtectedRoute roleRequired="admin">
+      <AdminCourses />
+    </ProtectedRoute>
+  }
+/>
 
       </Routes>
+
+    
     </BrowserRouter>
   );
 }
