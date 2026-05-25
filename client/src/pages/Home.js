@@ -1,7 +1,9 @@
 import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import "../App.css";
 
 function Home() {
+  const navigate = useNavigate();
 
   return (
 
@@ -38,7 +40,7 @@ function Home() {
           AI, Data Science, Programming and more.
         </p>
 
-        <button className="explore-btn">
+        <button className="explore-btn" onClick={() => navigate("/courses")}>
           Explore Courses
         </button>
 

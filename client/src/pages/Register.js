@@ -1,8 +1,12 @@
 import { useState } from "react";
 import axios from "axios";
 import "../App.css";
+import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 function Register() {
+  const navigate = useNavigate();
+  
 
   const [formData, setFormData] = useState({
     name: "",
@@ -73,8 +77,10 @@ function Register() {
         <button type="submit">
           Register
         </button>
-
-      </form>
+<p>
+  Already have an account?{" "}
+  <Link to="/login">Login</Link>
+</p>      </form>
 
     </div>
   );

@@ -2,6 +2,8 @@ import { useState } from "react";
 import axios from "axios";
 import "../App.css";
 import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
+
 
 function Login() {
   const navigate = useNavigate();
@@ -84,9 +86,9 @@ function Login() {
           onChange={handleChange}
         />
 
-        <button type="submit">
-          Login
-        </button>
+       <button type="submit" style={{ marginBottom: "10px" }}>
+  Login
+</button>
 
         
         <button
@@ -95,8 +97,10 @@ function Login() {
         >
           Forgot Password?
         </button>
-
-      </form>
+<p>
+  Don't have an account?{" "}
+  <Link to="/register">Register</Link>
+</p>            </form>
 
     </div>
   );

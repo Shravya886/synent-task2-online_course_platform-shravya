@@ -11,7 +11,7 @@ body{
   justify-content:space-between;
   align-items:center;
   padding:20px 40px;
-  background:#28a745;
+  background:#8c0dc3;
   color:white;
 }
 
@@ -24,7 +24,7 @@ body{
   padding:10px 18px;
   border:none;
   background:white;
-  color:#28a745;
+  color:#8c0dc3;
   border-radius:5px;
   cursor:pointer;
   font-size:15px;
@@ -60,7 +60,7 @@ body{
   padding:15px 28px;
   font-size:18px;
   border:none;
-  background:#28a745;
+  background:#8c0dc3;
   color:white;
   border-radius:5px;
   cursor:pointer;
@@ -68,7 +68,7 @@ body{
 }
 
 .explore-btn:hover{
-  background:#1e7e34;
+  background:#8c0dc3;
 }
 
 /* Register/Login Forms */
@@ -101,7 +101,7 @@ body{
 
 .form-container button{
   padding:12px;
-  background:#28a745;
+  background:#8c0dc3;
   color:white;
   border:none;
   border-radius:5px;
@@ -110,5 +110,5 @@ body{
 }
 
 .form-container button:hover{
-  background:#1e7e34;
+  background:#8c0dc3;
 }
