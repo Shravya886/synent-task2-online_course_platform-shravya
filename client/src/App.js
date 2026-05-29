@@ -14,6 +14,7 @@ import AdminDashboard from "./pages/AdminDashboard";
 import AdminCourses from "./pages/AdminCourses";
 import VerifyEmail from "./pages/VerifyEmail";
 import AdminEnrollments from "./pages/AdminEnrollments";
+import Courses from "./pages/Courses";
 
 function App() {
   return (
@@ -23,6 +24,7 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/courses" element={<Courses />} />
 
         <Route
           path="/dashboard"
